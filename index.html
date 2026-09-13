@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASB Ocean Strategy Calculator</title>
+    <style>
+        :root {
+            --navy-deep: #0f172a;
+            --ocean-blue: #0284c7;
+            --seafoam: #14b8a6;
+            --bg-canvas: #f0f9ff;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --border-color: #bae6fd;
+        }
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            background: var(--navy-deep);
+            color: white;
+            padding: 24px;
+            border-radius: 14px;
+            box-shadow: 0 10px 15px -3px rgba(2, 132, 199, 0.2);
+            border-bottom: 4px solid var(--seafoam);
+        }
+        header h1 {
+            margin: 0 0 6px 0;
+            font-size: 1.8rem;
+        }
+        header p {
+            color: #7dd3fc;
+            margin: 0;
+            font-size: 0.95rem;
+        }
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            margin-bottom: 24px;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--navy-deep);
+        }
+        .input-group input {
+            width: 100%;
+            padding: 11px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            outline: none;
+        }
+        .input-group input:focus {
+            border-color: var(--ocean-blue);
+        }
+        button {
+            background-color: var(--ocean-blue);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #0369a1;
+        }
+        .summary-banner {
+            background: var(--navy-deep);
+            color: white;
+            padding: 16px 20px;
+            border-radius: 10px;
+            margin-bottom: 24px;
+            border-left: 5px solid var(--seafoam);
+        }
+        .summary-banner strong {
+            color: var(--seafoam);
+        }
+        .comparison-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .results-grid {
+            display: grid;
+            gap: 12px;
+            margin-top: 15px;
+        }
+        .result-box {
+            background: #f0f9ff;
+            padding: 14px 16px;
+            border-radius: 8px;
+            border-left: 4px solid var(--ocean-blue);
+        }
+        .result-box.profit {
+            border-left-color: var(--seafoam);
+            background: #f0fdf4;
+        }
+        .result-box h3 {
+            margin: 0 0 4px 0;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        .result-box .value {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--navy-deep);
+        }
+        .visual-bar-container {
+            margin-top: 15px;
+        }
+        .bar-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .bar-bg {
+            background: #e2e8f0;
+            height: 22px;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+        .bar-fill-a {
+            background: var(--ocean-blue);
+            height: 100%;
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+        .bar-fill-b {
+            background: var(--seafoam);
+            height: 100%;
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+        @media(max-width: 768px) {
+            .comparison-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>ASB Ocean Strategy Tracker</h1>
+        <p>Person A (Monthly RM200) vs. Person B (Nov Lump-Sum RM2,400) • Fixed NAV RM1.00</p>
+    </header>
+
+    <div class="card">
+        <div class="form-grid">
+            <div class="input-group">
+                <label for="monthlyAmount">Person A Monthly (RM)</label>
+                <input type="number" id="monthlyAmount" value="200">
+            </div>
+            <div class="input-group">
+                <label for="annualLumpSum">Person B Yearly Lump-Sum (RM)</label>
+                <input type="number" id="annualLumpSum" value="2400">
+            </div>
+            <div class="input-group">
+                <label for="dividendRate">Expected Dividend Rate (%)</label>
+                <input type="number" step="0.05" id="dividendRate" value="5.75">
+            </div>
+            <div class="input-group">
+                <label for="years">Investment Duration (Years)</label>
+                <input type="number" id="years" value="5">
+            </div>
+        </div>
+        <button onclick="calculateASB()">Calculate Comparison</button>
+    </div>
+
+    <div class="summary-banner" id="strategyVerdict">
+        <span>Strategic Insight: </span>
+        <strong id="verdictText">Calculating comparison...</strong>
+    </div>
+
+    <div class="comparison-container">
+        <!-- Person A Results -->
+        <div class="card" style="border-top: 4px solid var(--ocean-blue);">
+            <h2 style="margin: 0 0 10px 0; font-size: 1.1rem; color: var(--navy-deep);">Person A (Monthly DCA)</h2>
+            <div class="results-grid">
+                <div class="result-box">
+                    <h3>Total Units Held</h3>
+                    <div class="value" id="aUnits">0.00 Units</div>
+                </div>
+                <div class="result-box">
+                    <h3>Total Invested Capital</h3>
+                    <div class="value" id="aInvested">RM 0.00</div>
+                </div>
+                <div class="result-box">
+                    <h3>Total Value (Principal + Div)</h3>
+                    <div class="value" id="aTotalValue">RM 0.00</div>
+                </div>
+                <div class="result-box profit">
+                    <h3>Total Profit / Loss</h3>
+                    <div class="value" id="aProfit">RM 0.00</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Person B Results -->
+        <div class="card" style="border-top: 4px solid var(--seafoam);">
+            <h2 style="margin: 0 0 10px 0; font-size: 1.1rem; color: var(--navy-deep);">Person B (Nov Lump-Sum)</h2>
+            <div class="results-grid">
+                <div class="result-box">
+                    <h3>Total Units Held</h3>
+                    <div class="value" id="bUnits">0.00 Units</div>
+                </div>
+                <div class="result-box">
+                    <h3>Total Invested Capital</h3>
+                    <div class="value" id="bInvested">RM 0.00</div>
+                </div>
+                <div class="result-box">
+                    <h3>Total Value (Principal + Div)</h3>
+                    <div class="value" id="bTotalValue">RM 0.00</div>
+                </div>
+                <div class="result-box profit">
+                    <h3>Total Profit / Loss</h3>
+                    <div class="value" id="bProfit">RM 0.00</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visual Bar Comparison -->
+    <div class="card">
+        <h2 style="margin: 0 0 15px 0; font-size: 1.1rem; color: var(--navy-deep);">Visual Growth Comparison</h2>
+        <div class="visual-bar-container">
+            <div class="bar-label">
+              <span>Person A (Monthly)</span>
+              <span id="barValA">RM 0</span>
+            </div>
+            <div class="bar-bg">
+                <div class="bar-fill-a" id="barA"></div>
+            </div>
+
+            <div class="bar-label">
+              <span>Person B (Nov Lump-Sum)</span>
+              <span id="barValB">RM 0</span>
+            </div>
+            <div class="bar-bg">
+                <div class="bar-fill-b" id="barB"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function calculateASB() {
+    const monthlyAmt = parseFloat(document.getElementById('monthlyAmount').value) || 0;
+    const lumpSumAmt = parseFloat(document.getElementById('annualLumpSum').value) || 0;
+    const rate = (parseFloat(document.getElementById('dividendRate').value) || 0) / 100;
+    const totalYears = parseInt(document.getElementById('years').value) || 1;
+
+    // Person A calculation
+    let balanceA = 0;
+    let totalInvestedA = 0;
+    for (let y = 1; y <= totalYears; y++) {
+        let yearlyDividend = 0;
+        for (let m = 1; m <= 12; m++) {
+            balanceA += monthlyAmt;
+            totalInvestedA += monthlyAmt;
+            yearlyDividend += balanceA * (rate / 12);
+        }
+        balanceA += yearlyDividend;
+    }
+    let profitA = balanceA - totalInvestedA;
+
+    // Person B calculation
+    let balanceB = 0;
+    let totalInvestedB = 0;
+    for (let y = 1; y <= totalYears; y++) {
+        let yearlyDividendB = 0;
+        for (let m = 1; m <= 12; m++) {
+            if (m === 11) {
+                balanceB += lumpSumAmt;
+                totalInvestedB += lumpSumAmt;
+            }
+            yearlyDividendB += balanceB * (rate / 12);
+        }
+        balanceB += yearlyDividendB;
+    }
+    let profitB = balanceB - totalInvestedB;
+
+    // Update text
+    document.getElementById('aUnits').innerText = balanceA.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " Units";
+    document.getElementById('aInvested').innerText = formatRM(totalInvestedA);
+    document.getElementById('aTotalValue').innerText = formatRM(balanceA);
+    document.getElementById('aProfit').innerText = formatRM(profitA);
+
+    document.getElementById('bUnits').innerText = balanceB.toLocaleString('en-MY', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " Units";
+    document.getElementById('bInvested').innerText = formatRM(totalInvestedB);
+    document.getElementById('bTotalValue').innerText = formatRM(balanceB);
+    document.getElementById('bProfit').innerText = formatRM(profitB);
+
+    // Verdict
+    const diff = balanceA - balanceB;
+    const verdictEl = document.getElementById('verdictText');
+    if (Math.abs(diff) < 1) {
+        verdictEl.innerText = "Both strategies yield virtually identical results.";
+    } else if (diff > 0) {
+        verdictEl.innerText = `Person A (Monthly) leads by ${formatRM(diff)} due to earlier compounding across the year.`;
+    } else {
+        verdictEl.innerText = `Person B (Nov Lump-Sum) leads by ${formatRM(Math.abs(diff))} in total final value.`;
+    }
+
+    // Update visual bars
+    const maxVal = Math.max(balanceA, balanceB, 1);
+    const widthA = (balanceA / maxVal) * 100;
+    const widthB = (balanceB / maxVal) * 100;
+    document.getElementById('barA').style.width = widthA + '%';
+    document.getElementById('barB').style.width = widthB + '%';
+    document.getElementById('barValA').innerText = formatRM(balanceA);
+    document.getElementById('barValB').innerText = formatRM(balanceB);
+}
+
+function formatRM(amount) {
+    return 'RM ' + amount.toLocaleString('en-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+window.onload = calculateASB;
+</script>
+
+</body>
+</html>
